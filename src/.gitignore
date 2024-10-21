@@ -1,0 +1,15 @@
+bin/
+obj/
+/packages/
+riderModule.iml
+/_ReSharper.Caches/
+.idea/
+.vs/
+*.user
+**/node_modules/
+.docker
+.idea
+.template
+find_large.py
+find_large.sh
+Makefile

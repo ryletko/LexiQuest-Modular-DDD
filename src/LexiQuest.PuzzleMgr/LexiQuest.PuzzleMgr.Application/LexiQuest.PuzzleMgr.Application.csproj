@@ -1,0 +1,28 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\LexiQuest.Framework\LexiQuest.Framework.Application\LexiQuest.Framework.Application.csproj" />
+      <ProjectReference Include="..\..\LexiQuest.Framework\LexiQuest.Framework.Infrastructure\LexiQuest.Framework.Infrastructure.csproj" />
+      <ProjectReference Include="..\LexiQuest.PuzzleMgr.Contracts\LexiQuest.PuzzleMgr.Contracts.csproj" />
+      <ProjectReference Include="..\LexiQuest.PuzzleMgr.Domain\LexiQuest.PuzzleMgr.Domain.csproj" />
+      <ProjectReference Include="..\..\LexiQuest.Shared.Puzzle\LexiQuest.Shared.Puzzle.csproj" />
+      <ProjectReference Include="..\..\Utils.Core\Utils.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MassTransit.Abstractions" Version="8.2.5" />
+      <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Events\" />
+      <Folder Include="Queries\" />
+    </ItemGroup>
+
+</Project>

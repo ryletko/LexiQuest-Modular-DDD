@@ -1,0 +1,47 @@
+﻿services:
+  lexiquest.webapp:
+    image: lexiquest.webapp
+    container_name: lexiquest.webapp
+    ports:
+      - 1110:80
+      - 1111:443
+    build:
+      context: .
+      dockerfile: src/LexiQuest.WebApp/LexiQuest.WebApp/Dockerfile
+    environment:
+      - ConnectionStrings__LexiQuest=Server=postgres;Port=5432;Database=lexiquest;User Id=postgres;Password=postgres;
+      - MessageBroker__Host=amqp://main-queue:5672/
+      - MessageBroker__Username=guest
+      - MessageBroker__Password=guest
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=DeveloperCert
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/developercert.pfx
+    depends_on:
+      - rabbit
+      - postgres
+    volumes:
+      - ~/.aspnet/https:/https:ro
+
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    ports:
+      - 5433:5432
+    volumes:
+      - ./.docker/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=lexiquest
+  
+  rabbit:
+    image: masstransit/rabbitmq:latest
+    container_name: rabbit
+    hostname: main-queue
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ./.docker/rabbitmq/data/:/var/lib/rabbitmq/
+      - ./.docker/rabbitmq/log/:/var/log/rabbitmq

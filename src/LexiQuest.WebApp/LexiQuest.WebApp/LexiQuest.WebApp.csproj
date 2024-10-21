@@ -1,0 +1,515 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>disable</ImplicitUsings>
+        <UserSecretsId>98a23579-b727-455f-9d1a-fb5a04852993</UserSecretsId>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Auth0.AspNetCore.Authentication" Version="1.4.0" />
+        <PackageReference Include="MassTransit.RabbitMQ" Version="8.2.5" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+        <PackageReference Include="Serilog.Formatting.Compact" Version="3.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+        <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+        <ProjectReference Include="..\..\LexiQuest.Import\LexiQuest.Import.GoogleSheets\LexiQuest.Import.GoogleSheets.csproj" />
+        <ProjectReference Include="..\..\LexiQuest.Framework\LexiQuest.Framework.Infrastructure\LexiQuest.Framework.Infrastructure.csproj" />
+        <ProjectReference Include="..\..\LexiQuest.Module\LexiQuest.Module.csproj" />
+        <ProjectReference Include="..\..\LexiQuest.PuzzleMgr\LexiQuest.PuzzleMgr.Infrastructure\LexiQuest.PuzzleMgr.Infrastructure.csproj" />
+        <ProjectReference Include="..\..\LexiQuest.QuizGame\LexiQuest.QuizGame.Contracts\LexiQuest.QuizGame.Contracts.csproj" />
+        <ProjectReference Include="..\..\LexiQuest.QuizGame\LexiQuest.QuizGame.Infrastructure\LexiQuest.QuizGame.Infrastructure.csproj" />
+        <ProjectReference Include="..\LexiQuest.WebApp.Shared\LexiQuest.WebApp.Shared.csproj" />
+        <ProjectReference Include="..\..\Utils.Core\Utils.Core.csproj" />
+        <ProjectReference Include="..\LexiQuest.WebApp.Client\LexiQuest.WebApp.Client.csproj" />
+        <PackageReference Include="MassTransit" Version="8.2.5" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.5" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap\bootstrap.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\bootstrap\bootstrap.min.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-grid.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-grid.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-grid.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-grid.min.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-grid.rtl.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-grid.rtl.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-grid.rtl.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-grid.rtl.min.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-reboot.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-reboot.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-reboot.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-reboot.min.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-reboot.rtl.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-reboot.rtl.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-reboot.rtl.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-reboot.rtl.min.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-utilities.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-utilities.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-utilities.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-utilities.min.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-utilities.rtl.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-utilities.rtl.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-utilities.rtl.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap-utilities.rtl.min.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap.min.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap.rtl.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap.rtl.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap.rtl.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\css\bootstrap.rtl.min.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\js\bootstrap.bundle.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\js\bootstrap.bundle.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\js\bootstrap.bundle.min.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\js\bootstrap.bundle.min.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\js\bootstrap.esm.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\js\bootstrap.esm.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\js\bootstrap.esm.min.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\js\bootstrap.esm.min.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\js\bootstrap.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\js\bootstrap.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\js\bootstrap.min.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\dist\js\bootstrap.min.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\alert.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\alert.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\base-component.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\base-component.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\button.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\button.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\carousel.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\carousel.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\collapse.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\collapse.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\dom\data.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\dom\data.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\dom\event-handler.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\dom\event-handler.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\dom\manipulator.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\dom\manipulator.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\dom\selector-engine.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\dom\selector-engine.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\dropdown.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\dropdown.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\modal.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\modal.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\offcanvas.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\offcanvas.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\popover.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\popover.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\scrollspy.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\scrollspy.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\tab.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\tab.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\toast.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\toast.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\tooltip.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\tooltip.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\backdrop.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\backdrop.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\component-functions.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\component-functions.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\config.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\config.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\focustrap.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\focustrap.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\index.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\index.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\sanitizer.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\sanitizer.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\scrollbar.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\scrollbar.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\swipe.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\swipe.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\template-factory.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\dist\util\template-factory.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\index.esm.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\index.umd.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\alert.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\base-component.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\button.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\carousel.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\collapse.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\dom\data.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\dom\event-handler.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\dom\manipulator.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\dom\selector-engine.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\dropdown.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\modal.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\offcanvas.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\popover.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\scrollspy.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\tab.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\toast.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\tooltip.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\util\backdrop.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\util\component-functions.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\util\config.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\util\focustrap.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\util\index.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\util\sanitizer.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\util\scrollbar.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\util\swipe.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\src\util\template-factory.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\browsers.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\helpers\fixture.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\integration\bundle-modularity.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\integration\bundle.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\integration\index.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\integration\rollup.bundle-modularity.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\integration\rollup.bundle.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\karma.conf.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\README.md" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\.eslintrc.json" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\alert.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\base-component.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\button.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\carousel.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\collapse.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\dom\data.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\dom\event-handler.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\dom\manipulator.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\dom\selector-engine.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\dropdown.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\jquery.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\modal.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\offcanvas.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\popover.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\scrollspy.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\tab.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\toast.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\tooltip.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\util\backdrop.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\util\component-functions.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\util\config.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\util\focustrap.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\util\index.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\util\sanitizer.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\util\scrollbar.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\util\swipe.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\unit\util\template-factory.spec.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\visual\.eslintrc.json" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\visual\alert.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\visual\button.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\visual\carousel.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\visual\collapse.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\visual\dropdown.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\visual\modal.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\visual\popover.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\visual\scrollspy.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\visual\tab.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\visual\toast.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\js\tests\visual\tooltip.html" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\LICENSE" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\package.json" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\README.md" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\bootstrap-grid.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\bootstrap-grid.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\bootstrap-grid.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\bootstrap-reboot.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\bootstrap-reboot.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\bootstrap-reboot.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\bootstrap-utilities.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\bootstrap-utilities.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\bootstrap-utilities.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\bootstrap.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\bootstrap.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\bootstrap.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\css\bootstrap-grid.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\css\bootstrap-grid.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\css\bootstrap-reboot.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\css\bootstrap-reboot.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\css\bootstrap-utilities.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\css\bootstrap-utilities.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\css\bootstrap.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\css\bootstrap.css.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\forms\_floating-labels.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\forms\_form-check.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\forms\_form-control.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\forms\_form-range.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\forms\_form-select.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\forms\_form-text.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\forms\_input-group.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\forms\_labels.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\forms\_validation.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\helpers\_clearfix.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\helpers\_color-bg.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\helpers\_colored-links.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\helpers\_position.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\helpers\_ratio.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\helpers\_stacks.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\helpers\_stretched-link.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\helpers\_text-truncation.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\helpers\_visually-hidden.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\helpers\_vr.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_alert.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_backdrop.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_banner.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_border-radius.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_box-shadow.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_breakpoints.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_buttons.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_caret.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_clearfix.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_color-mode.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_color-scheme.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_container.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_deprecate.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_forms.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_gradients.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_grid.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_image.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_list-group.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_lists.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_pagination.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_reset-text.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_resize.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_table-variants.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_text-truncate.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_transition.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_utilities.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\mixins\_visually-hidden.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\utilities\_api.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\vendor\_rfs.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_accordion.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_alert.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_badge.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_breadcrumb.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_button-group.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_buttons.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_card.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_carousel.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_close.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_containers.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_dropdown.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_forms.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_functions.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_grid.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_helpers.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_images.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_list-group.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_maps.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_mixins.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_modal.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_nav.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_navbar.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_offcanvas.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_pagination.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_placeholders.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_popover.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_progress.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_reboot.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_root.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_spinners.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_tables.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_toasts.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_tooltip.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_transitions.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_type.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_utilities.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_variables-dark.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\bootstrap\scss\_variables.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\scss\component\_card.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\scss\component\_reboot.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\scss\layouts\_header.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\scss\layouts\_layouts.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\scss\layouts\_sidebar.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\scss\pages\_dashboard1.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\scss\prepros.config" />
+      <_ContentIncludedByDefault Remove="wwwroot\scss\styles.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\scss\utilities\_background.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\scss\utilities\_icon-size.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\scss\variables\_theme-variables.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\scss\variables\_variables.scss" />
+      <_ContentIncludedByDefault Remove="wwwroot\js\app.min.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\js\dashboard.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\js\sidebarmenu.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\AUTHORS.txt" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\bower.json" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\dist\core.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\dist\jquery.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\dist\jquery.min.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\dist\jquery.min.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\dist\jquery.slim.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\dist\jquery.slim.min.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\dist\jquery.slim.min.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\external\sizzle\dist\sizzle.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\external\sizzle\dist\sizzle.min.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\external\sizzle\dist\sizzle.min.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\external\sizzle\LICENSE.txt" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\LICENSE.txt" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\package.json" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\README.md" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\.eslintrc.json" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\ajax.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\ajax\jsonp.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\ajax\load.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\ajax\parseXML.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\ajax\script.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\ajax\var\location.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\ajax\var\nonce.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\ajax\var\rquery.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\ajax\xhr.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\attributes.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\attributes\attr.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\attributes\classes.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\attributes\prop.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\attributes\support.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\attributes\val.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\callbacks.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\access.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\camelCase.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\DOMEval.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\init.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\isAttached.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\nodeName.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\parseHTML.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\ready-no-deferred.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\ready.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\readyException.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\stripAndCollapse.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\support.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\toType.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\core\var\rsingleTag.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css\addGetHookIf.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css\adjustCSS.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css\curCSS.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css\finalPropName.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css\hiddenVisibleSelectors.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css\showHide.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css\support.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css\var\cssExpand.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css\var\getStyles.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css\var\isHiddenWithinTree.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css\var\rboxStyle.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css\var\rnumnonpx.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\css\var\swap.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\data.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\data\Data.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\data\var\acceptData.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\data\var\dataPriv.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\data\var\dataUser.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\deferred.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\deferred\exceptionHook.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\deprecated.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\dimensions.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\effects.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\effects\animatedSelector.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\effects\Tween.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\event.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\event\ajax.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\event\alias.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\event\focusin.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\event\support.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\event\trigger.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\exports\amd.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\exports\global.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\jquery.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\manipulation.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\manipulation\buildFragment.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\manipulation\getAll.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\manipulation\setGlobalEval.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\manipulation\support.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\manipulation\var\rscriptType.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\manipulation\var\rtagName.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\manipulation\wrapMap.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\manipulation\_evalUrl.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\offset.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\queue.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\queue\delay.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\selector-native.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\selector-sizzle.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\selector.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\serialize.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\traversing.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\traversing\findFilter.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\traversing\var\dir.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\traversing\var\rneedsContext.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\traversing\var\siblings.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\arr.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\class2type.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\concat.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\document.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\documentElement.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\fnToString.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\getProto.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\hasOwn.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\indexOf.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\isFunction.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\isWindow.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\ObjectFunctionString.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\pnum.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\push.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\rcheckableType.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\rcssNum.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\rnothtmlwhite.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\slice.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\support.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\var\toString.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\jquery\src\wrap.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\dist\simplebar-core.esm.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\dist\simplebar-core.esm.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\dist\simplebar.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\dist\simplebar.d.ts" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\dist\simplebar.esm.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\dist\simplebar.esm.js.map" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\dist\simplebar.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\dist\simplebar.min.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\dist\simplebar.min.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\dist\simplebar.umd.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\LICENSE" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\package.json" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\README.md" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\src\helpers.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\src\index.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\src\scrollbar-width.js" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\src\simplebar.css" />
+      <_ContentIncludedByDefault Remove="wwwroot\libs\simplebar\src\simplebar.js" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Content Update="_front\scss\icons\tabler-icons\fonts\tabler-icons.eot">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="_front\scss\icons\tabler-icons\fonts\tabler-icons.svg">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="_front\scss\icons\tabler-icons\fonts\tabler-icons.ttf">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="_front\scss\icons\tabler-icons\fonts\tabler-icons.woff">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="_front\scss\icons\tabler-icons\fonts\tabler-icons.woff2">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="_front\scss\icons\tabler-icons\tabler-icons.css">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="_front\app.css">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="wwwroot\js\" />
+    </ItemGroup>
+
+</Project>

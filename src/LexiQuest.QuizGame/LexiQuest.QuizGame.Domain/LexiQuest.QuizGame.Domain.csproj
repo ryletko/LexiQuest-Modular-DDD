@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>LexiQuest.QuizGame.Domain</AssemblyName>
+        <RootNamespace>LexiQuest.QuizGame.Domain</RootNamespace>
+        <LangVersion>default</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\LexiQuest.Framework\LexiQuest.Framework.Domain\LexiQuest.Framework.Domain.csproj" />
+      <ProjectReference Include="..\..\LexiQuest.Shared.Puzzle\LexiQuest.Shared.Puzzle.csproj" />
+      <ProjectReference Include="..\..\Utils.Core\Utils.Core.csproj" />
+    </ItemGroup>
+
+</Project>

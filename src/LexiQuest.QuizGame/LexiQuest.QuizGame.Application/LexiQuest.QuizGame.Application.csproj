@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <AssemblyName>LexiQuest.QuizGame.Application</AssemblyName>
+        <RootNamespace>LexiQuest.QuizGame.Application</RootNamespace>
+        <LangVersion>default</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\LexiQuest.Framework\LexiQuest.Framework.Application\LexiQuest.Framework.Application.csproj" />
+      <ProjectReference Include="..\..\LexiQuest.PuzzleMgr\LexiQuest.PuzzleMgr.Contracts\LexiQuest.PuzzleMgr.Contracts.csproj" />
+      <ProjectReference Include="..\LexiQuest.QuizGame.Contracts\LexiQuest.QuizGame.Contracts.csproj" />
+      <ProjectReference Include="..\LexiQuest.QuizGame.Domain\LexiQuest.QuizGame.Domain.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="MassTransit" Version="8.2.5" />
+      <PackageReference Include="MassTransit.Abstractions" Version="8.2.5" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.7" />
+      <PackageReference Include="Serilog" Version="4.0.0" />
+      <PackageReference Include="System.Linq.Async" Version="6.0.1" />
+    </ItemGroup>
+
+</Project>

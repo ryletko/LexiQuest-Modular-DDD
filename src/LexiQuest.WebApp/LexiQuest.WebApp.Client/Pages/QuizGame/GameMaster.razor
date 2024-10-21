@@ -1,0 +1,126 @@
+﻿@page "/quizgame"
+@inject IApiService ApiService;
+@using LexiQuest.WebApp.Shared.QuizGame
+@using LexiQuest.WebApp.Shared.Services
+@using Microsoft.AspNetCore.SignalR.Client
+@using Utils.Core
+@attribute [Authorize]
+@inject NavigationManager Navigation
+
+@Log
+
+<div class="card quiz-game-card mx-auto">
+    <div class="card-body">
+        @if (Loading)
+        {
+            <PageTitle>Loading</PageTitle>
+            <h1>Loading</h1>
+            @foreach (var startedGamesStatuses in StartedGamesStatuses)
+            {
+                <div>@startedGamesStatuses.RequestedAt.FormatDateTime(): @startedGamesStatuses.Status</div>
+            }
+        }
+        else
+        {
+            <PageTitle>Quiz Game</PageTitle>
+            @if (CurrentGameId != null)
+            {
+                <GameComponent GameId="CurrentGameId.Value" OnGameFinished="OnGameFinished"></GameComponent>
+            }
+            else
+            {
+                <div>NO STARTED GAMES</div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+
+    private string Log;
+
+    private HubConnection? HubConnection { get; set; }
+
+    public bool Loading { get; set; } = true;
+
+    public Guid? CurrentGameId { get; set; }
+
+    public List<GetStartedGamesStatusesRp> StartedGamesStatuses { get; set; } = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        HubConnection = new HubConnectionBuilder()
+                       .WithUrl(Navigation.ToAbsoluteUri("/startgamestate"))
+                       .Build();
+
+        HubConnection.On<StartNewGameStatusDto>("StartNewGameStatusUpdate",
+                                                async (StartNewGameStatusDto message) =>
+                                                {
+                                                    if (message.Completed)
+                                                        await CheckStartedGame();
+
+                                                    await PopulateStartNewGameStatuses();
+                                                    await InvokeAsync(StateHasChanged);
+                                                });
+
+        await HubConnection.StartAsync();
+
+        await base.OnInitializedAsync();
+    }
+
+    public async Task PopulateStartNewGameStatuses()
+    {
+        StartedGamesStatuses = await ApiService.HttpClient.GetFromJsonAsync<List<GetStartedGamesStatusesRp>>("api/quizgame/games/started/statuses") ?? [];
+    }
+
+    public async Task StartNewGame()
+    {
+        var response = await ApiService.HttpClient.PostAsync("api/quizgame/games/started", null);
+    }
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await ProvideStartedGame();
+            await InvokeAsync(StateHasChanged);
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task<bool> CheckStartedGame()
+    {
+        var startedGames = await ApiService.HttpClient.GetFromJsonAsync<List<GetStartedGamesRp>>("api/quizgame/games/started");
+        CurrentGameId = startedGames.FirstOrDefault()?.Guid;
+        if (CurrentGameId != null)
+        {
+            Loading = false;
+            return true;
+        }
+
+        return false;
+    }
+
+    private async Task<bool> CheckStatusesForStartGameRequests()
+    {
+        await PopulateStartNewGameStatuses();
+        return StartedGamesStatuses.Any();
+    }
+
+    private async Task ProvideStartedGame()
+    {
+        if (await CheckStartedGame())
+            return;
+
+        if (await CheckStatusesForStartGameRequests())
+            return;
+
+        await StartNewGame();
+    }
+
+    private async Task OnGameFinished()
+    {
+        await ProvideStartedGame();
+    }
+}

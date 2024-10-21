@@ -1,0 +1,247 @@
+﻿@using System.Collections.Concurrent
+@using LexiQuest.Shared.QuizGame
+@using LexiQuest.WebApp.Shared.GameHub
+@using LexiQuest.WebApp.Shared.QuizGame
+@using LexiQuest.WebApp.Shared.Services
+@using Microsoft.AspNetCore.SignalR.Client
+@using Utils.Core
+@inject IApiService ApiService
+@inject NavigationManager Navigation
+
+<Toasts class="p-3" Messages="ToastMessages" Placement="ToastsPlacement.MiddleCenter" AutoHide="true" Delay="1000"/>
+
+<div class="row">
+    <div class="col-10">
+        <h1>Quiz Game</h1>
+    </div>
+    <div class="col-2">
+        <button class="btn ti ti-x" @onclick="FinishGame"></button>
+    </div>
+</div>
+@if (Game != null)
+{
+    <div class="game-box">
+        <div>
+            <div>
+                <div class="float-left" style="width: 300px;">
+                    <p class="h6">Score: @Game.Score (@Game.CompletedCardsNumber/@Game.TotalCardsNumber)</p>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="mb-2">
+                <div class="small">
+                    @Game.CurrentPuzzle.From
+                </div>
+                <div class="small">
+                    @Game.CurrentPuzzle.Level
+                </div>
+                <div>
+                    <i>@Game.CurrentPuzzle.PartsOfSpeech - @GetNumberOfWords(Game.CurrentPuzzle) words</i>
+                </div>
+                <div>
+                    <ul class="mb-0" data-ng-repeat="def in gameEntities.definitions">
+                        @foreach (var def in Game.CurrentPuzzle.Definitions)
+                        {
+                            <li>
+                                <b>@def</b>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div class="mb-2">
+                <input @ref="AnswerInput" type="text" autocomplete="off" class="form-control" placeholder="Your answer" autofocus="autofocus" @bind="@Answer" @onkeyup="HandleEnter"/>
+            </div>
+            @if (Game.CurrentFaceUpCard.LastResult != null)
+            {
+                <div class="mb-2">
+                    @if (@Game.CurrentFaceUpCard is {LastResult: FaceUpCardCheckResult.HintAfterMistake or FaceUpCardCheckResult.HintWithoutAttempt})
+                    {
+                        <div class="mb-2">
+                            Hint: <span class="bg-warning text-white px-2">@Game.CurrentFaceUpCard.Hint</span>
+                        </div>
+                    }
+
+                    @if (Game.CurrentFaceUpCard is {LastResult: FaceUpCardCheckResult.GaveUp})
+                    {
+                        <div class="mb-2 ">
+                            Correct Answer: <span class="bg-danger text-white px-2">@Game.CurrentPuzzle.ForeignWord</span>
+                        </div>
+                    }
+                </div>
+            }
+            else if (Game.PreviousPuzzle != null)
+            {
+                <div class="mb-2">
+                    @* <div>@Game.PreviousPuzzle.ForeignWord</div> *@
+                    <div>@Game.PreviousPuzzle.Transcription</div>
+                    @if (Game.PreviousPuzzle.Examples.Any())
+                    {
+                        <div class="mt-1">Examples:</div>
+                        <ul>
+                            @foreach (var ex in Game.PreviousPuzzle.Examples)
+                            {
+                                <li>@ex</li>
+                            }
+                        </ul>
+                    }
+                </div>
+            }
+            <div>
+                <button class="btn btn-primary btn-block w-100" @onclick="SubmitAnswer">Submit answer</button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+
+    [Parameter] public Guid GameId { get; set; }
+
+    readonly List<ToastMessage> ToastMessages = [];
+
+    ElementReference AnswerInput;
+
+    HubConnection? GameHubConnection { get; set; }
+
+    string Answer { get; set; } = String.Empty;
+
+    GetGameByIdRp? Game { get; set; }
+
+    [Parameter] public EventCallback OnGameFinished { get; set; }
+
+    private ConcurrentDictionary<Guid, bool> _awaitedCommands = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        GameHubConnection = new HubConnectionBuilder()
+                           .WithUrl(Navigation.ToAbsoluteUri("/game"))
+                           .Build();
+
+        GameHubConnection.On<GameStateUpdatedDto>("GameStateUpdated",
+                                                  async (model) =>
+                                                  {
+                                                      if (GameId != model.GameId)
+                                                          return;
+
+                                                      if (model.GameStatus == GameStatus.Finished)
+                                                      {
+                                                          Toast(ToastType.Danger, "Game finished");
+                                                          await OnGameFinished.InvokeAsync();
+                                                      }
+
+                                                      await LoadGameState();
+                                                      
+                                                      if (_awaitedCommands.TryRemove(model.CommandId, out var dummy))
+                                                      {
+                                                          // Toast(ToastType.Danger, model.CommandId.ToString());
+                                                          ToastLastResult();
+                                                      }
+
+                                                      StateHasChanged();
+                                                  });
+
+        GameHubConnection.Reconnecting += async (arg) => { Toast(ToastType.Warning, "Reconnecting..."); };
+
+        await GameHubConnection.StartAsync();
+
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await LoadGameState();
+            await InvokeAsync(StateHasChanged);
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task LoadGameState()
+    {
+        Game = await ApiService.HttpClient.GetFromJsonAsync<GetGameByIdRp>($"api/quizgame/games/{GameId}");
+        await FocusToAnswerInput();
+        ClearFormIfNewCard();
+    }
+
+    private void ToastLastResult()
+    {
+        if (Game?.CurrentFaceUpCard.LastResult != null)
+        {
+            if (Game.CurrentFaceUpCard.LastResult == FaceUpCardCheckResult.FirstMistake)
+                Toast(ToastType.Danger, "the first pancake is always a flop");
+            else if (Game.CurrentFaceUpCard.LastResult == FaceUpCardCheckResult.MistakenAgain)
+                Toast(ToastType.Danger, "You must learn better!");
+            else if (Game.CurrentFaceUpCard.LastResult == FaceUpCardCheckResult.MinorMistake)
+                Toast(ToastType.Warning, "You are very close...");
+        }
+        else if (Game?.PreviousFaceUpCard != null)
+        {
+            if (Game.PreviousFaceUpCard.LastResult == FaceUpCardCheckResult.PureSuccess)
+                Toast(ToastType.Success, "Brilliant!");
+            else if (Game.PreviousFaceUpCard.LastResult == FaceUpCardCheckResult.SuccessAfterMistake)
+                Toast(ToastType.Success, "Good, but not perfekt.");
+            else if (Game.PreviousFaceUpCard.LastResult == FaceUpCardCheckResult.SuccessAfterHint)
+                Toast(ToastType.Success, "Next time you'll do it yourself");
+        }
+    }
+    
+    private void ClearFormIfNewCard()
+    {
+        if (Game!.CurrentFaceUpCard.LastResult == null)
+        {
+            Answer = String.Empty;
+        }
+    }
+
+    private async Task SubmitAnswer()
+    {
+        // TODO надо подумать о том, что можно было бы correlation id устанавливать прямо с фронта, чтобы лучше отлавливалось через signalr относящееся к этому запросу,
+        // а то вдруг ответ на этот запрос придет позже чем signalr просигналит об обновившемся статусе 
+        var result = await ApiService.HttpClient.PostAsJsonAsync($"api/quizgame/faceupcards/{Game.CurrentFaceUpCard.CardId}/answer",
+                                                                 new SubmitAnswerRq()
+                                                                 {
+                                                                     Answer = Answer ?? String.Empty
+                                                                 });
+        if (result.IsSuccessStatusCode)
+        {
+            var commandId = await result.Content.ReadFromJsonAsync<Guid>();
+            _awaitedCommands.TryAdd(commandId, true);
+        }
+
+        await FocusToAnswerInput();
+    }
+
+    private async Task HandleEnter(KeyboardEventArgs arg)
+    {
+        if (arg.Code is "Enter" or "NumpadEnter")
+        {
+            await SubmitAnswer();
+        }
+    }
+
+    private async Task FocusToAnswerInput()
+    {
+        if (AnswerInput.Context != null)
+            await AnswerInput.FocusAsync();
+    }
+
+    private void Toast(ToastType toastType, string messageText)
+    {
+        ToastMessages.Add(new ToastMessage(toastType, messageText));
+    }
+
+    private async Task FinishGame(MouseEventArgs obj)
+    {
+        await ApiService.HttpClient.PostAsync($"api/quizgame/games/{GameId}/finish", null);
+    }
+
+    private int GetNumberOfWords(GetGameByIdRp.Puzzle puzzle)
+    {
+        char[] delimiters = [' ', '\r', '\n'];
+        return puzzle.ForeignWord.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).Length;
+    }
+
+}

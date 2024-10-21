@@ -1,0 +1,181 @@
+﻿@page "/puzzles"
+@using LexiQuest.WebApp.Shared.Import
+@using LexiQuest.WebApp.Shared.Puzzles
+@using LexiQuest.WebApp.Shared.Services
+@using Microsoft.AspNetCore.SignalR.Client
+@using Utils.Core
+@attribute [Authorize] 
+@inject IApiService ApiService
+@inherits LexiQuestComponentBase;
+
+
+@Log
+
+@if (Imports.Any())
+{
+    <div class="card w-100">
+        <div class="card-body">
+            <div>
+                <h1>IMPORTS</h1>
+                <div>
+                    @foreach (var i in Imports)
+                    {
+                        <div>
+                            <span>ImportId: @i.Id</span>
+                            <span>Started: @i.StartedAt</span>
+                            <span>Status: @i.Status</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="card w-100">
+    <div class="card-body">
+        <PageTitle>Puzzles</PageTitle>
+        <h1>Puzzles</h1>
+        <div class="mb-2">
+            <button class="btn btn-primary ti ti-plus" @onclick="ShowAddPuzzleForm"></button>
+            <button class="btn btn-primary ti ti-upload" @onclick="StartImport"></button>
+            <button class="btn btn-primary ti ti-clear-all" @onclick="DeleteAll"></button>
+        </div>
+        <Grid TItem="GetPuzzlesRp"
+              Class="table table-hover table-bordered table-striped"
+              DataProvider="PuzzlesDataProvider"
+              AllowFiltering="true"
+              AllowPaging="false"
+              AllowSorting="true"
+              AllowSelection="true"
+              SelectionMode="GridSelectionMode.Multiple"
+              SelectedItemsChanged="OnSelectedItemsChanged"
+              Responsive="true">
+
+            <GridColumns>
+                <GridColumn TItem="GetPuzzlesRp" HeaderText="Part Of Speech" PropertyName="PartsOfSpeech" SortKeySelector="item => item.PartsOfSpeech">
+                    @context.PartsOfSpeech.GetEnumDescription()
+                </GridColumn>
+                <GridColumn TItem="GetPuzzlesRp" HeaderText="Word" PropertyName="ForeignWord" SortKeySelector="item => item.ForeignWord">
+                    @context.ForeignWord
+                </GridColumn>
+                <GridColumn TItem="GetPuzzlesRp" HeaderText="Definitions" PropertyName="Definitions">
+                    @foreach (var df in context.Definitions)
+                    {
+                        @df<br/>
+                    }
+                </GridColumn>
+                <GridColumn TItem="GetPuzzlesRp" HeaderText="Synonims" PropertyName="Synonims">
+                    @foreach (var syn in context.Synonims)
+                    {
+                        @syn<br/>
+                    }
+                </GridColumn>
+            </GridColumns>
+
+        </Grid>
+    </div>
+</div>
+
+
+<AddNewPuzzle @ref="AddNewPuzzle"/>
+
+@code {
+
+   
+    record ImportStatus(string Status,
+                                bool Completed);
+
+    AddNewPuzzle AddNewPuzzle { get; set; }
+
+    List<GetPuzzlesRp>? Puzzles { get; set; } = default;
+
+    HubConnection? HubConnection { get; set; }
+
+    List<GetImportStatusesRp> Imports { get; set; } = [];
+
+    String Log { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        HubConnection = new HubConnectionBuilder()
+                       .WithUrl(Navigation.ToAbsoluteUri("/importpuzzlesstate"))
+                       .Build();
+
+        HubConnection.On<ImportStatusUpdateDto>("ImportStatusUpdate",
+                                                async (ImportStatusUpdateDto message) =>
+                                                {
+                                                    if (message.Completed)
+                                                    {
+                                                        await PopulatePuzzles();
+                                                    }
+
+                                                    await PopulateImports();
+                                                    await InvokeAsync(StateHasChanged);
+                                                });
+        
+        await HubConnection.StartAsync();
+
+        await base.OnInitializedAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await PopulateImports();
+            await InvokeAsync(StateHasChanged);
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task StartImport()
+    {
+        var response = await ApiService.HttpClient.PostAsJsonAsync("api/import",
+                                                                   new StartImportRq
+                                                                   {
+                                                                       ImportSourceId = new Guid("9b77339e-ee3a-4c9c-8b3b-5fdd41c3a563")
+                                                                   });
+    }
+
+    private async Task DeleteAll()
+    {
+        await ApiService.HttpClient.DeleteAsync("api/puzzles/");
+    }
+    
+    private async Task PopulateImports()
+    {
+        Imports = await ApiService.HttpClient.GetFromJsonAsync<List<GetImportStatusesRp>>("api/import");
+    }
+
+    private async Task PopulatePuzzles()
+    {
+        var getRqResult = await ApiService.HttpClient.GetAsync("api/puzzles");
+        var getPuzzlesResult = await getRqResult.Content.ReadFromJsonAsync<List<GetPuzzlesRp>>();
+        Puzzles = getPuzzlesResult;
+    }
+
+    private async Task ShowAddPuzzleForm()
+    {
+        await AddNewPuzzle.ShowAsync();
+    }
+
+    private async Task<GridDataProviderResult<GetPuzzlesRp>> PuzzlesDataProvider(GridDataProviderRequest<GetPuzzlesRp> request)
+    {
+        if (Puzzles is null)
+        {
+            // pull employees only one time for client-side filtering, sorting, and paging
+            var getRqResult = await ApiService.HttpClient.GetAsync("api/puzzles");
+            var getPuzzlesResult = await getRqResult.Content.ReadFromJsonAsync<List<GetPuzzlesRp>>();
+            Puzzles = getPuzzlesResult;
+        }
+
+        return await Task.FromResult(request.ApplyTo(Puzzles));
+    }
+
+    private async Task OnSelectedItemsChanged(HashSet<GetPuzzlesRp> arg)
+    {
+    }
+
+}

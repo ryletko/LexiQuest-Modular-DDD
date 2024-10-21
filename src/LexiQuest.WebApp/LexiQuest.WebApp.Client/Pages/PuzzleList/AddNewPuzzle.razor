@@ -1,0 +1,148 @@
+﻿@using LexiQuest.Shared.Puzzle
+@using LexiQuest.WebApp.Shared.LanguageLevels
+@using LexiQuest.WebApp.Shared.Services
+@using Utils.Core
+@inject IApiService ApiService
+
+<Modal @ref="modal" Title="Add new puzzle">
+    <BodyTemplate>
+        <form>
+            <div class="mb-3">
+                <label class="form-label" for="languageSelect">Language</label>
+
+                @* <InputSelect class="form-select" aria-label="Select part of speech" id="languageSelect" Value="@Language" ValueChanged="@((int? v) => LanguageChanged(v))" ValueExpression="@(() => Language)"> *@
+                @*     <option selected>Select language</option> *@
+                @*     @foreach (var lang in Languages) *@
+                @*     { *@
+                @*         <option value="@lang.Key">@lang.Value</option> *@
+                @*     } *@
+                @* </InputSelect> *@
+
+                <select class="form-select" aria-label="Select language" id="languageSelect" value="@Language" @onchange="LanguageChanged">
+                    <option value="">Select language</option>
+                    @foreach (var lang in Languages)
+                    {
+                        <option value="@lang.Key">@lang.Value</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="partOfSpeechSelect">Part of speech</label>
+                <select class="form-select" aria-label="Select part of speech" id="partOfSpeechSelect">
+                    <option selected>Select part of speech</option>
+                    @foreach (var ps in PartsOfSpeech)
+                    {
+                        <option value="@ps.Key">@ps.Value</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="addNewPuzzleForeignWord">Foreign Word</label>
+                <input type="text" class="form-control" @bind="@ForeignWord" id="addNewPuzzleForeignWord" placeholder="Enter foreign word" aria-label="Enter foreign word">
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="definitionTextBox0">Definitions</label>
+                <MultiTextBox IdPrefix="definitionTextBox" Placeholder="Enter definition" @bind-Values="Definitions"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="exampleTextBox0">Examples</label>
+                <MultiTextBox IdPrefix="exampleTextBox" Placeholder="Enter example" @bind-Values="Examples"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="synonimTextBox0">Synonims</label>
+                <MultiTextBox IdPrefix="synonimTextBox" Placeholder="Enter synonim" @bind-Values="Synonims"/>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="transcriptionTextBox">Transcription</label>
+                <input type="text" class="form-control" @bind="@Transcription" id="transcriptionTextBox" placeholder="Enter transcription" aria-label="Enter transcription">
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="levelSelect">Level</label>
+                <select class="form-select" aria-label="Select level" id="levelSelect" value="@Level" @onchange="LanguageChanged">
+                    <option selected>Select level</option>
+                    @foreach (var l in Levels)
+                    {
+                        <option value="@l.Key">@l.Value</option>
+                    }
+                </select>
+            </div>
+        </form>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Primary" @onclick="OnSaveBtnClick">Save</Button>
+        <Button Color="ButtonColor.Danger" @onclick="OnCancelClick">Cancel</Button>
+    </FooterTemplate>
+</Modal>
+
+@code {
+
+    private Modal modal = default!;
+
+    private List<GetLanguageLevelsRp> LanguageLevels { get; set; }
+
+    private List<KeyValue<int, string>> PartsOfSpeech { get; set; }
+    private List<KeyValue<int, string>> Languages { get; set; }
+    private List<KeyValue<string, string>> Levels { get; set; }
+
+    private string ForeignWord { get; set; }
+    private int? Language { get; set; }
+    private List<string> Synonims { get; set; } = [String.Empty];
+    private List<string> Examples { get; set; } = [String.Empty];
+    private List<string> Definitions { get; set; } = [String.Empty];
+    private string Transcription { get; set; }
+    private string Level { get; set; }
+    
+    [Parameter] public EventCallback<MouseEventArgs> OnSaveClick { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> OnCancelClick { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        PartsOfSpeech = EnumHelper.GetKeyValues<PartsOfSpeech>().ToList();
+        Languages     = EnumHelper.GetKeyValues<Language>().ToList();
+        Levels        = [];
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            await LoadLanguageLevels();
+        }
+    }
+
+    private async Task LoadLanguageLevels()
+    {
+        var getRqResult = await ApiService.HttpClient.GetAsync("api/LanguageLevels");
+        var languageLevels = await getRqResult.Content.ReadFromJsonAsync<List<GetLanguageLevelsRp>>();
+        LanguageLevels = languageLevels;
+        FilterLangLevels();
+    }
+
+    private void FilterLangLevels()
+    {
+        Levels = LanguageLevels.Where(x => x.Language == (Language?)Language)
+                               .Select(x => new KeyValue<string, string>(x.LevelName, x.LevelName))
+                               .ToList();
+    }
+
+    public async Task ShowAsync()
+    {
+        await modal.ShowAsync();
+    }
+
+    public async Task OnSaveBtnClick(MouseEventArgs e)
+    {
+        await OnSaveClick.InvokeAsync(e);
+    }
+
+
+    private void LanguageChanged(ChangeEventArgs e)
+    {
+        Language = ((string) e.Value).ToInt32Null();
+        FilterLangLevels();
+    }
+
+}

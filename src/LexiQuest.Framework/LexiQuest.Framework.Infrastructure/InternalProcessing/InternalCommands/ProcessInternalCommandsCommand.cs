@@ -1,0 +1,3 @@
+﻿namespace LexiQuest.Framework.Infrastructure.InternalProcessing.InternalCommands;
+
+internal record ProcessInternalCommandsCommand : IInternalCommand, IRecurringCommand;

@@ -1,0 +1,70 @@
+﻿@for (var i = 0; i < Values.Count; i++)
+{
+    var capturedI = i;
+    <div class="input-group">
+        <input type="text" class="form-control" id="@($"{IdPrefix}{i}")" placeholder="@Placeholder" aria-label="@Placeholder" @oninput="e => ValueOnChange(e, capturedI)" value="@Values[i]">
+        @if (i == Values.Count - 1 && ShowAddBtn)
+        {
+            <div class="input-group-append">
+                <Button Color="ButtonColor.None" @onclick="AddValueTextBox">
+                    <Icon Name="IconName.Plus"/>
+                </Button>
+            </div>
+        }
+    </div>
+}
+
+@code {
+
+
+    [Parameter]
+    public EventCallback<List<string>> ValuesChanged { get; set; }
+
+    private List<string> _values = [];
+
+    [Parameter]
+    public List<string> Values
+    {
+        get => _values;
+        set
+        {
+            if (_values == value)
+                return;
+
+            if (value == null || !value.Any())
+                _values = [String.Empty];
+            else
+                _values = value;
+
+            ValuesChanged.InvokeAsync(value);
+        }
+    }
+
+    [Parameter]
+    public string? IdPrefix { get; set; }
+
+    [Parameter]
+    public string Placeholder { get; set; } = "Enter value";
+
+    public bool ShowAddBtn { get; set; }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        ShowAddBtn =   false;
+        IdPrefix   ??= Guid.NewGuid().ToString().Replace("-", "");
+    }
+
+    protected void AddValueTextBox()
+    {
+        Values.Add(String.Empty);
+        ShowAddBtn = false;
+    }
+
+    protected void ValueOnChange(ChangeEventArgs e, int i)
+    {
+        Values[i]  = (string) e.Value;
+        ShowAddBtn = Values.All(x => !String.IsNullOrWhiteSpace(x));
+    }
+
+}
