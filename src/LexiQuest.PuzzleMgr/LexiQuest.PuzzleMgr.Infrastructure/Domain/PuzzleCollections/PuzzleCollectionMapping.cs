@@ -1,5 +1,5 @@
 ﻿using LexiQuest.PuzzleMgr.Domain.PuzzleCollections;
-using LexiQuest.PuzzleMgr.Infrastructure.Config.DataAccess;
+using LexiQuest.PuzzleMgr.Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -33,7 +33,8 @@ public record GetGameByIdResult(bool Found,
                          string? Level);
 
     public record FaceUpCard(Guid FaceUpCardId,
-                                    string? Hint,
-                                    bool IsMistaken,
-                                    FaceUpCardCheckResult? LastResult);
+                             string? Hint,
+                             bool IsMistaken,
+                             FaceUpCardCheckResult? LastResult,
+                             double AnswerDistance);
 }

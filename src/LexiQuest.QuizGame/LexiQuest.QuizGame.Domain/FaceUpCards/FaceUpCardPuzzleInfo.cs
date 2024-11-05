@@ -36,19 +36,19 @@ public class FaceUpCardPuzzleInfo : ValueObject
     }
 
     public FaceUpCardPuzzleInfo(FaceDownCardId faceDownCardId, string foreignWord, string partsOfSpeech, string? transcription, string? from,
-                          Language language, List<string> definitions, List<string> synonims, List<string> examples, string? level)
+                                Language language, List<string> definitions, List<string> synonims, List<string> examples, string? level)
     {
         Validate();
 
-        FaceDownCardId      = faceDownCardId;
-        ForeignWord   = foreignWord;
-        PartsOfSpeech = partsOfSpeech;
-        Transcription = transcription;
-        From          = from;
-        Language      = language;
-        _definitions  = definitions;
-        _synonims     = synonims;
-        _examples     = examples;
-        Level         = level;
+        FaceDownCardId = faceDownCardId;
+        ForeignWord    = foreignWord;
+        PartsOfSpeech  = partsOfSpeech;
+        Transcription  = transcription;
+        From           = from;
+        Language       = language;
+        _definitions   = definitions;
+        _synonims      = synonims;
+        _examples      = examples;
+        Level          = level;
     }
 }

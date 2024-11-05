@@ -4,6 +4,7 @@ using LexiQuest.QuizGame.Domain.FaceUpCards.Events;
 using LexiQuest.QuizGame.Domain.FaceUpCards.Hints;
 using LexiQuest.QuizGame.Domain.FaceUpCards.PuzzleChecking;
 using LexiQuest.QuizGame.Domain.FaceUpCards.Rules;
+using LexiQuest.QuizGame.Domain.FaceUpCards.SimilarityCalc;
 using LexiQuest.QuizGame.Domain.GameStates;
 using LexiQuest.QuizGame.Domain.Players;
 
@@ -15,6 +16,7 @@ public class FaceUpCard : Entity, IAggregateRoot
 {
     private static readonly AnswerChecker AnswerChecker = new();
     private static readonly HintGenerator HintGenerator = new();
+    private static readonly AnswerDistanceCalculator AnswerDistanceCalculator = new();
 
     public FaceUpCardId Id { get; private init; }
     public GameId GameId { get; private set; }
@@ -25,7 +27,8 @@ public class FaceUpCard : Entity, IAggregateRoot
     public bool Mistaken { get; private set; }
     public DateTimeOffset? CompletedAt { get; private set; }
     public FaceUpCardPuzzleInfo PuzzleInfo { get; private set; } //ii DDD не про производительность и экономию места 
-    public FaceUpCardCheckResult? LastResult { get; private set; }
+    public FaceUpCardCheckStatusEnum? LastResult { get; private set; }
+    public double AnswerDistance { get; private set; }
 
     private FaceUpCard()
     {
@@ -50,59 +53,60 @@ public class FaceUpCard : Entity, IAggregateRoot
     {
         BusinessRule.Check(new FaceUpCardNotCompleted(this));
 
-        FaceUpCardCheckResult cardCheckResult;
+        FaceUpCardCheckStatusEnum cardCheckStatusEnum;
         var foreingWord = PuzzleInfo.ForeignWord;
         var answerCheckResult = AnswerChecker.Check(answer, PuzzleInfo);
+        AnswerDistance = AnswerDistanceCalculator.Calculate(answer.ToString(), PuzzleInfo.ForeignWord);
 
-        if (answerCheckResult == AnswerCheckResult.Success)
+        if (answerCheckResult == AnswerCheckStatusEnum.Success)
         {
             if (Hint != null)
-                cardCheckResult = FaceUpCardCheckResult.SuccessAfterHint;
+                cardCheckStatusEnum = FaceUpCardCheckStatusEnum.SuccessAfterHint;
             else if (Mistaken)
-                cardCheckResult = FaceUpCardCheckResult.SuccessAfterMistake;
+                cardCheckStatusEnum = FaceUpCardCheckStatusEnum.SuccessAfterMistake;
             else
-                cardCheckResult = FaceUpCardCheckResult.PureSuccess;
+                cardCheckStatusEnum = FaceUpCardCheckStatusEnum.PureSuccess;
 
             CompletedAt = SystemClock.Now;
         }
-        else if (answerCheckResult == AnswerCheckResult.Mistake)
+        else if (answerCheckResult == AnswerCheckStatusEnum.Mistake)
         {
             if (!Mistaken)
-                cardCheckResult = FaceUpCardCheckResult.FirstMistake;
+                cardCheckStatusEnum = FaceUpCardCheckStatusEnum.FirstMistake;
             else
-                cardCheckResult = FaceUpCardCheckResult.MistakenAgain;
+                cardCheckStatusEnum = FaceUpCardCheckStatusEnum.MistakenAgain;
 
             Mistaken = true;
         }
-        else if (answerCheckResult == AnswerCheckResult.GiveUp)
+        else if (answerCheckResult == AnswerCheckStatusEnum.GiveUp)
         {
             if (Hint == null)
             {
                 if (!Mistaken)
-                    cardCheckResult = FaceUpCardCheckResult.HintWithoutAttempt;
+                    cardCheckStatusEnum = FaceUpCardCheckStatusEnum.HintWithoutAttempt;
                 else
-                    cardCheckResult = FaceUpCardCheckResult.HintAfterMistake;
+                    cardCheckStatusEnum = FaceUpCardCheckStatusEnum.HintAfterMistake;
 
                 Hint = HintGenerator.GenerateHint(foreingWord);
             }
             else
             {
-                cardCheckResult = FaceUpCardCheckResult.GaveUp;
+                cardCheckStatusEnum = FaceUpCardCheckStatusEnum.GaveUp;
             }
         }
-        else if (answerCheckResult is AnswerCheckResult.Synonim or AnswerCheckResult.WrongArticle or AnswerCheckResult.WrongPluralForm)
+        else if (answerCheckResult is AnswerCheckStatusEnum.Synonim or AnswerCheckStatusEnum.WrongArticle or AnswerCheckStatusEnum.WrongPluralForm)
         {
-            cardCheckResult = FaceUpCardCheckResult.MinorMistake;
+            cardCheckStatusEnum = FaceUpCardCheckStatusEnum.MinorMistake;
         }
         else
         {
             throw new InvalidOperationException("Unsupported puzzle result");
         }
 
-        LastResult = cardCheckResult;
+        LastResult = cardCheckStatusEnum;
 
-        AddDomainEvent(new FaceUpCardProcessed(GameId, PuzzleInfo.FaceDownCardId, cardCheckResult));
+        AddDomainEvent(new FaceUpCardProcessed(GameId, PuzzleInfo.FaceDownCardId, cardCheckStatusEnum));
         if (CompletedAt != null)
-            AddDomainEvent(new FaceUpCardCompleted(GameId, cardCheckResult));
+            AddDomainEvent(new FaceUpCardCompleted(GameId, cardCheckStatusEnum));
     }
 }

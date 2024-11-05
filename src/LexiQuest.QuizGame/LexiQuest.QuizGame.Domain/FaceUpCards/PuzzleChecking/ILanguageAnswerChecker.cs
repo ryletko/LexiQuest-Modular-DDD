@@ -2,5 +2,5 @@
 
 internal interface ILanguageAnswerChecker
 {
-    AnswerCheckResult Check(string word, string foreignWord, IReadOnlyCollection<string> synonims);
+    AnswerCheckStatusEnum Check(string word, string foreignWord, IReadOnlyCollection<string> synonims);
 }

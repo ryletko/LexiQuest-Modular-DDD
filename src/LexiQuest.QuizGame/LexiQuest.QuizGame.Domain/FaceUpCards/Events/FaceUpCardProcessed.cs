@@ -6,6 +6,6 @@ namespace LexiQuest.QuizGame.Domain.FaceUpCards.Events;
 
 public record FaceUpCardProcessed(GameId GameId,
                                   FaceDownCardId FaceDownCardId,
-                                  FaceUpCardCheckResult CardCheckResult) : DomainEventBase
+                                  FaceUpCardCheckStatusEnum CardCheckStatusEnum) : DomainEventBase
 {
 }

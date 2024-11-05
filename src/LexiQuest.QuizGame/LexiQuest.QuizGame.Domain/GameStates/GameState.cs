@@ -46,10 +46,10 @@ public class GameState : Entity, IAggregateRoot
         AddDomainEvent(new GameStateUpdated(GameId, Status));
     }
 
-    public void ApplyResult(FaceUpCardCheckResult cardCheckResult)
+    public void ApplyResult(FaceUpCardCheckStatusEnum cardCheckStatusEnum)
     {
         BusinessRule.Check(new GameIsActiveRule(Status));
-        Score = Score.ApplyTurnResult(cardCheckResult);
+        Score = Score.ApplyTurnResult(cardCheckStatusEnum);
         AddDomainEvent(new GameStateUpdated(GameId, Status));
     }
 

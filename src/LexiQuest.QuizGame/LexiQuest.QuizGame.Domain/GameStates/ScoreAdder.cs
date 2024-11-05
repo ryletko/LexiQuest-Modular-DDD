@@ -4,24 +4,24 @@ namespace LexiQuest.QuizGame.Domain.GameStates;
 
 internal static class ScoreAdder
 {
-    public static Score ApplyTurnResult(this Score score, FaceUpCardCheckResult cardCheckResult)
+    public static Score ApplyTurnResult(this Score score, FaceUpCardCheckStatusEnum cardCheckStatusEnum)
     {
-        if (cardCheckResult is FaceUpCardCheckResult.PureSuccess or 
-                          FaceUpCardCheckResult.SuccessAfterHint or 
-                          FaceUpCardCheckResult.SuccessAfterMistake)
+        if (cardCheckStatusEnum is FaceUpCardCheckStatusEnum.PureSuccess or 
+                          FaceUpCardCheckStatusEnum.SuccessAfterHint or 
+                          FaceUpCardCheckStatusEnum.SuccessAfterMistake)
             return Score.FromInt(score.IntVal + 12);
         
-        if (cardCheckResult is FaceUpCardCheckResult.FirstMistake or 
-                          FaceUpCardCheckResult.MistakenAgain)
+        if (cardCheckStatusEnum is FaceUpCardCheckStatusEnum.FirstMistake or 
+                          FaceUpCardCheckStatusEnum.MistakenAgain)
             return Score.FromInt(score.IntVal - 2);
         
-        if (cardCheckResult == FaceUpCardCheckResult.HintAfterMistake)
+        if (cardCheckStatusEnum == FaceUpCardCheckStatusEnum.HintAfterMistake)
             return Score.FromInt(score.IntVal - 6);
         
-        if (cardCheckResult == FaceUpCardCheckResult.HintWithoutAttempt)
+        if (cardCheckStatusEnum == FaceUpCardCheckStatusEnum.HintWithoutAttempt)
             return Score.FromInt(score.IntVal - 8);
         
-        if (cardCheckResult == FaceUpCardCheckResult.GaveUp)
+        if (cardCheckStatusEnum == FaceUpCardCheckStatusEnum.GaveUp)
             return Score.FromInt(score.IntVal - 8);
 
         return score;

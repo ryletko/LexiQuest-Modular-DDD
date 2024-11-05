@@ -273,3 +273,4 @@ __pycache__/
 # tools/
 
 **/logs/
+/_front/

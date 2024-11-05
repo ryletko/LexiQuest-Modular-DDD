@@ -61,9 +61,9 @@ internal class GetGameByIdQueryHandler(IQueryContext queryContext) : QueryHandle
                                          result.Status.GetEnumDescription(),
                                          result.Score.IntVal,
                                          result.CardDeckId.Value,
-                                         result.CurrentFaceUpCard.Map(t => new GetGameByIdResult.FaceUpCard(t.Id.Value, t.Hint, t.Mistaken, t.LastResult.ToExternalCheckResult())),
+                                         result.CurrentFaceUpCard.Map(t => new GetGameByIdResult.FaceUpCard(t.Id.Value, t.Hint, t.Mistaken, t.LastResult.ToExternalCheckResult(), t.AnswerDistance)),
                                          result.CurrentFaceUpCard.PuzzleInfo.Map(turnMap),
-                                         result.PreviousFaceUpCard?.Map(t => new GetGameByIdResult.FaceUpCard(t.Id.Value, t.Hint, t.Mistaken, t.LastResult.ToExternalCheckResult())),
+                                         result.PreviousFaceUpCard?.Map(t => new GetGameByIdResult.FaceUpCard(t.Id.Value, t.Hint, t.Mistaken, t.LastResult.ToExternalCheckResult(), t.AnswerDistance)),
                                          result.PreviousFaceUpCard?.PuzzleInfo.Map(turnMap),
                                          result.CardDeckSize,
                                          result.CompletedCards));

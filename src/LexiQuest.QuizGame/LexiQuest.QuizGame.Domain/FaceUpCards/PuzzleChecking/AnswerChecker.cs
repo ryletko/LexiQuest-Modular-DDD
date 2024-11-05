@@ -10,10 +10,10 @@ internal class AnswerChecker
     private static readonly Lazy<GermanAnswerChecker> GermanCheckerLazy = new(() => new GermanAnswerChecker());
     private ILanguageAnswerChecker GermanChecker => GermanCheckerLazy.Value;
 
-    public AnswerCheckResult Check(FaceUpCardAnswer answer, FaceUpCardPuzzleInfo puzzle)
+    public AnswerCheckStatusEnum Check(FaceUpCardAnswer answer, FaceUpCardPuzzleInfo puzzle)
     {
         if (answer.IsEmpty())
-            return AnswerCheckResult.GiveUp;
+            return AnswerCheckStatusEnum.GiveUp;
         
         ILanguageAnswerChecker checker;
         if (puzzle.Language == Language.English)

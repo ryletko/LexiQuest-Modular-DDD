@@ -1,4 +1,4 @@
-﻿namespace LexiQuest.PuzzleMgr.Infrastructure.Config.DataAccess;
+﻿namespace LexiQuest.PuzzleMgr.Infrastructure.DataAccess;
 
 public class Schema
 {

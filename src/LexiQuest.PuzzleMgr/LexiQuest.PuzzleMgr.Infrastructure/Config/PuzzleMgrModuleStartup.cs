@@ -1,7 +1,7 @@
 ﻿using LexiQuest.Framework.Infrastructure.EventBus;
 using LexiQuest.Framework.Module;
 using LexiQuest.Module;
-using LexiQuest.PuzzleMgr.Infrastructure.Config.DataAccess;
+using LexiQuest.PuzzleMgr.Infrastructure.DataAccess;
 using Serilog;
 
 namespace LexiQuest.PuzzleMgr.Infrastructure.Config;

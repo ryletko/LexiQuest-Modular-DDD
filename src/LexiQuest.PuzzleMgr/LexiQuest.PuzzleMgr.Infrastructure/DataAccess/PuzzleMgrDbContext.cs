@@ -1,7 +1,6 @@
 ﻿using LexiQuest.Framework.Infrastructure.DataAccess;
 using LexiQuest.PuzzleMgr.Domain.PuzzleCollections;
 using LexiQuest.PuzzleMgr.Domain.Puzzles;
-using LexiQuest.PuzzleMgr.Infrastructure.Config.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

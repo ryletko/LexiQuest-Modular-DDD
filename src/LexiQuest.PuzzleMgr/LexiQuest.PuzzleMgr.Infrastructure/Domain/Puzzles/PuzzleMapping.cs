@@ -1,6 +1,6 @@
 ﻿using LexiQuest.PuzzleMgr.Domain.Puzzles;
 using LexiQuest.PuzzleMgr.Domain.Puzzles.ForeignWords;
-using LexiQuest.PuzzleMgr.Infrastructure.Config.DataAccess;
+using LexiQuest.PuzzleMgr.Infrastructure.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -1,6 +1,6 @@
 ﻿namespace LexiQuest.QuizGame.Domain.FaceUpCards;
 
-public enum FaceUpCardCheckResult
+public enum FaceUpCardCheckStatusEnum
 {
     PureSuccess,
     SuccessAfterMistake,

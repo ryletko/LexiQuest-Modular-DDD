@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LexiQuest.Framework.Application.EventBus;
 using LexiQuest.Framework.Application.Messages.EventBus;
 using LexiQuest.QuizGame.Contracts.Commands;
 using LexiQuest.QuizGame.Contracts.Queries;
@@ -117,7 +116,7 @@ public class GamesController(IEventBus eventBus,
                      g.Status,
                      g.Score,
                      g.CardDeckId,
-                     g.CurrentFaceUpCard.Map(t => new GetGameByIdRp.FaceUpCard(t.FaceUpCardId, t.Hint, t.IsMistaken, t.LastResult)),
+                     g.CurrentFaceUpCard.Map(t => new GetGameByIdRp.FaceUpCard(t.FaceUpCardId, t.Hint, t.IsMistaken, t.LastResult, t.AnswerDistance)),
                      g.CurrentPuzzle.Map(p => new GetGameByIdRp.Puzzle(
                                              p.PuzzleId,
                                              p.ForeignWord,
@@ -130,7 +129,7 @@ public class GamesController(IEventBus eventBus,
                                              p.Examples,
                                              p.Level
                                          )),
-                     g.PreviousFaceUpCard?.Map(t => new GetGameByIdRp.FaceUpCard(t.FaceUpCardId, t.Hint, t.IsMistaken, t.LastResult)),
+                     g.PreviousFaceUpCard?.Map(t => new GetGameByIdRp.FaceUpCard(t.FaceUpCardId, t.Hint, t.IsMistaken, t.LastResult, t.AnswerDistance)),
                      g.PreviousPuzzle?.Map(p => new GetGameByIdRp.Puzzle(
                                                p.PuzzleId,
                                                p.ForeignWord,

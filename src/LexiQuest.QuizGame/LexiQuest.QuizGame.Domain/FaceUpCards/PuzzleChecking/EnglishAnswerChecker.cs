@@ -2,7 +2,7 @@
 
 internal class EnglishAnswerChecker : ILanguageAnswerChecker
 {
-    public AnswerCheckResult Check(string word, string foreignWord, IReadOnlyCollection<string> synonims)
+    public AnswerCheckStatusEnum Check(string word, string foreignWord, IReadOnlyCollection<string> synonims)
     {
         var optionalEnglishWords = new[]
                                    {
@@ -15,12 +15,12 @@ internal class EnglishAnswerChecker : ILanguageAnswerChecker
                                    };
 
         if (foreignWord.Split(';').Any(x => Match(word, x, optionalEnglishWords)))
-            return AnswerCheckResult.Success;
+            return AnswerCheckStatusEnum.Success;
 
         if (synonims.Any(x => Match(word, x, optionalEnglishWords)))
-            return AnswerCheckResult.Synonim;
+            return AnswerCheckStatusEnum.Synonim;
 
-        return AnswerCheckResult.Mistake;
+        return AnswerCheckStatusEnum.Mistake;
     }
 
     private bool Match(string str1, string str2, string[][] keywords) => Matching.Match(ToShorts(str1), ToShorts(str2), keywords);

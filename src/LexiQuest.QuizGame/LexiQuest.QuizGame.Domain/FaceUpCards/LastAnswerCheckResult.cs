@@ -23,19 +23,19 @@ public class LastAnswerCheckResult: Enumeration
     private class WrongArticleResult() : LastAnswerCheckResult(5, "WrongArticle");
     private class WrongPluralFormResult() : LastAnswerCheckResult(6, "WrongPluralForm");
 
-    public static LastAnswerCheckResult Map(AnswerCheckResult answerCheckResult)
+    public static LastAnswerCheckResult Map(AnswerCheckStatusEnum answerCheckStatusEnum)
     {
-        if (answerCheckResult == AnswerCheckResult.Success)
+        if (answerCheckStatusEnum == AnswerCheckStatusEnum.Success)
             return Success;
-        if (answerCheckResult == AnswerCheckResult.Mistake)
+        if (answerCheckStatusEnum == AnswerCheckStatusEnum.Mistake)
             return Mistake;
-        if (answerCheckResult == AnswerCheckResult.GiveUp)
+        if (answerCheckStatusEnum == AnswerCheckStatusEnum.GiveUp)
             return GiveUp;
-        if (answerCheckResult == AnswerCheckResult.Synonim)
+        if (answerCheckStatusEnum == AnswerCheckStatusEnum.Synonim)
             return Synonim;
-        if (answerCheckResult == AnswerCheckResult.WrongArticle)
+        if (answerCheckStatusEnum == AnswerCheckStatusEnum.WrongArticle)
             return WrongArticle;
-        if (answerCheckResult == AnswerCheckResult.WrongPluralForm)
+        if (answerCheckStatusEnum == AnswerCheckStatusEnum.WrongPluralForm)
             return WrongPluralForm;
 
         throw new InvalidOperationException("Unsupported answer check result.");

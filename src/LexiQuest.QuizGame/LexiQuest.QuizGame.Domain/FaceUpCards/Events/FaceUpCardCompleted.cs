@@ -4,4 +4,4 @@ using LexiQuest.QuizGame.Domain.GameStates;
 namespace LexiQuest.QuizGame.Domain.FaceUpCards.Events;
 
 public record FaceUpCardCompleted(GameId GameId,
-                                  FaceUpCardCheckResult CardCheckResult) : DomainEventBase;
+                                  FaceUpCardCheckStatusEnum CardCheckStatusEnum) : DomainEventBase;

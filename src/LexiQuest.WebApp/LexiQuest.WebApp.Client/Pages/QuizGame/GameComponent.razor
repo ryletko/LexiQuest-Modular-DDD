@@ -25,6 +25,10 @@
             <div>
                 <div class="float-left" style="width: 300px;">
                     <p class="h6">Score: @Game.Score (@Game.CompletedCardsNumber/@Game.TotalCardsNumber)</p>
+                    @if (Game.CurrentFaceUpCard.LastResult != null)
+                    {
+                        <p class="h6">Match: @((1.0 - Game.CurrentFaceUpCard.AnswerDistance).ToString("P0")) </p>
+                    }
                 </div>
                 <div class="clearfix"></div>
             </div>

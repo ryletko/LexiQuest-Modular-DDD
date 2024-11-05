@@ -22,7 +22,7 @@
 //     
 // }
 
-public enum AnswerCheckResult
+public enum AnswerCheckStatusEnum
 {
     Success,
     Mistake,

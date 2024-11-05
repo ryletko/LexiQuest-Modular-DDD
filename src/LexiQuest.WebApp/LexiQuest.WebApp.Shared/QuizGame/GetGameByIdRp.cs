@@ -29,5 +29,6 @@ public record GetGameByIdRp(Guid GameId,
     public record FaceUpCard(Guid CardId,
                              string? Hint,
                              bool IsMistaken,
-                             FaceUpCardCheckResult? LastResult);
+                             FaceUpCardCheckResult? LastResult,
+                             double AnswerDistance);
 }
