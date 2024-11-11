@@ -4,11 +4,28 @@
 @using LexiQuest.WebApp.Shared.QuizGame
 @using LexiQuest.WebApp.Shared.Services
 @using Microsoft.AspNetCore.SignalR.Client
-@using Utils.Core
 @inject IApiService ApiService
 @inject NavigationManager Navigation
+@inject IJSRuntime JsRuntime;
 
 <Toasts class="p-3" Messages="ToastMessages" Placement="ToastsPlacement.MiddleCenter" AutoHide="true" Delay="1000"/>
+
+<script>
+    window.gameComponent = {
+        init: function (dotNetReference) {
+            window.gameComponent.tryReconnectSignalR = function () {
+                console.log('trying reconnecting...');
+                dotNetReference.invokeMethodAsync('TryReconnectSignalR');
+            };
+        }
+    };
+    
+    window.addEventListener('focus', function ()  {
+        console.log('window focus');
+        window.gameComponent.tryReconnectSignalR();
+    });
+    
+</script>
 
 <div class="row">
     <div class="col-10">
@@ -135,7 +152,7 @@
                                                       }
 
                                                       await LoadGameState();
-                                                      
+
                                                       if (_awaitedCommands.TryRemove(model.CommandId, out var dummy))
                                                       {
                                                           // Toast(ToastType.Danger, model.CommandId.ToString());
@@ -152,12 +169,30 @@
         await base.OnInitializedAsync();
     }
 
+    [JSInvokable]
+    public async Task TryReconnectSignalR()
+    {
+        if (GameHubConnection.State == HubConnectionState.Disconnected)
+        {
+            try
+            {
+                await GameHubConnection.StartAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Reconnection failed: " + ex.Message);
+            }
+        }
+    }
+
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             await LoadGameState();
             await InvokeAsync(StateHasChanged);
+            await JsRuntime.InvokeVoidAsync("gameComponent.init", DotNetObjectReference.Create(this));
         }
 
         await base.OnAfterRenderAsync(firstRender);
@@ -191,7 +226,7 @@
                 Toast(ToastType.Success, "Next time you'll do it yourself");
         }
     }
-    
+
     private void ClearFormIfNewCard()
     {
         if (Game!.CurrentFaceUpCard.LastResult == null)

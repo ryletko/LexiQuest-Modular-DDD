@@ -9,5 +9,4 @@ public class BaseController: ControllerBase
     {
         return User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
     }
-
 }

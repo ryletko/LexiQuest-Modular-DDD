@@ -21,7 +21,7 @@ COPY ["LexiQuest.Import/LexiQuest.Import.GoogleSheets.Contracts/LexiQuest.Import
 COPY ["LexiQuest.PuzzleMgr/LexiQuest.PuzzleMgr.Application/LexiQuest.PuzzleMgr.Application.csproj", "LexiQuest.PuzzleMgr/LexiQuest.PuzzleMgr.Application/"]
 COPY ["LexiQuest.PuzzleMgr/LexiQuest.PuzzleMgr.Application/LexiQuest.PuzzleMgr.Application.csproj", "LexiQuest.PuzzleMgr/LexiQuest.PuzzleMgr.Application/"]
 COPY ["LexiQuest.PuzzleMgr/LexiQuest.PuzzleMgr.Domain/LexiQuest.PuzzleMgr.Domain.csproj", "LexiQuest.PuzzleMgr/LexiQuest.PuzzleMgr.Domain/"]
-COPY ["LexiQuest.PuzzleMgr/.Infrastructure/LexiQuest.PuzzleMgr.Infrastructure.csproj", "LexiQuest.PuzzleMgr/LexiQuest.PuzzleMgr.Infrastructure/"]
+COPY ["LexiQuest.PuzzleMgr/LexiQuest.PuzzleMgr.Infrastructure/LexiQuest.PuzzleMgr.Infrastructure.csproj", "LexiQuest.PuzzleMgr/LexiQuest.PuzzleMgr.Infrastructure/"]
 
 COPY ["LexiQuest.QuizGame/LexiQuest.QuizGame.Application/LexiQuest.QuizGame.Application.csproj", "LexiQuest.QuizGame/LexiQuest.QuizGame.Application/"]
 COPY ["LexiQuest.QuizGame/LexiQuest.QuizGame.Contracts/LexiQuest.QuizGame.Contracts.csproj", "LexiQuest.QuizGame/LexiQuest.QuizGame.Contracts/"]

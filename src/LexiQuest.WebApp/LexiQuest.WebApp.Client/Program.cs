@@ -14,5 +14,4 @@ builder.Services.AddHttpClient("WebApi", client => client.BaseAddress = new Uri(
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("WebApi"));
 builder.Services.AddTransient<IApiService, ApiService>();
 
-
 await builder.Build().RunAsync();
