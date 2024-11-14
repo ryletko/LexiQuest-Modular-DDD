@@ -8,6 +8,7 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddSingleton<AuthenticationStateProvider, PersistentAuthenticationStateProvider>();
+builder.Services.AddSingleton<IPersistingState, PersistingState>();
 builder.Services.AddBlazorBootstrap();
 
 builder.Services.AddHttpClient("WebApi", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress));

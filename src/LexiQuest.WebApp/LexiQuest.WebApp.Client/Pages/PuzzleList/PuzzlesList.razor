@@ -1,5 +1,6 @@
 ﻿@page "/puzzles"
 @using LexiQuest.WebApp.Shared.Import
+@using LexiQuest.WebApp.Shared.ImportSources
 @using LexiQuest.WebApp.Shared.Puzzles
 @using LexiQuest.WebApp.Shared.Services
 @using Microsoft.AspNetCore.SignalR.Client
@@ -7,9 +8,12 @@
 @attribute [Authorize] 
 @inject IApiService ApiService
 @inherits LexiQuestComponentBase;
+@inject IPersistingState PersistingState;
 
+<Toasts class="p-3" Messages="ToastMessages" Placement="ToastsPlacement.TopRight" AutoHide="true"/>
 
 @Log
+
 
 @if (Imports.Any())
 {
@@ -41,9 +45,10 @@
             <button class="btn btn-primary ti ti-upload" @onclick="StartImport"></button>
             <button class="btn btn-primary ti ti-clear-all" @onclick="DeleteAll"></button>
         </div>
-        <Grid TItem="GetPuzzlesRp"
+        <Grid @ref="PuzzlesGrid"
+              TItem="GetPuzzlesRp"
               Class="table table-hover table-bordered table-striped"
-              DataProvider="PuzzlesDataProvider"
+              Data="Puzzles"
               AllowFiltering="true"
               AllowPaging="false"
               AllowSorting="true"
@@ -82,99 +87,132 @@
 
 @code {
 
-   
-    record ImportStatus(string Status,
+    private readonly List<ToastMessage> ToastMessages = [];
+
+    private HubConnection? ImportHubConnection;
+    private HubConnection? PuzzlesHubConnection;
+
+    private Grid<GetPuzzlesRp> PuzzlesGrid;
+
+    private record ImportStatus(string Status,
                                 bool Completed);
 
-    AddNewPuzzle AddNewPuzzle { get; set; }
+    private AddNewPuzzle AddNewPuzzle;
 
-    List<GetPuzzlesRp>? Puzzles { get; set; } = default;
+    private List<GetPuzzlesRp> Puzzles = [];
+    private List<GetImportStatusesRp> Imports = [];
+    private List<ImportSourceRp> ImportSources = [];
 
-    HubConnection? HubConnection { get; set; }
+    private String Log { get; set; }
 
-    List<GetImportStatusesRp> Imports { get; set; } = [];
-
-    String Log { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        HubConnection = new HubConnectionBuilder()
-                       .WithUrl(Navigation.ToAbsoluteUri("/importpuzzlesstate"))
-                       .Build();
-
-        HubConnection.On<ImportStatusUpdateDto>("ImportStatusUpdate",
-                                                async (ImportStatusUpdateDto message) =>
-                                                {
-                                                    if (message.Completed)
-                                                    {
-                                                        await PopulatePuzzles();
-                                                    }
-
-                                                    await PopulateImports();
-                                                    await InvokeAsync(StateHasChanged);
-                                                });
-        
-        await HubConnection.StartAsync();
+        await Task.WhenAll(ConnectToImportHub(),
+                           ConnectToPuzzlesHub(),
+                           LoadOrPersistImportStatuses(),
+                           LoadOrPersistImportSources(),
+                           LoadOrPersistPuzzles());
 
         await base.OnInitializedAsync();
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await PopulateImports();
-            await InvokeAsync(StateHasChanged);
-        }
+    private async Task LoadOrPersistImportStatuses() => Imports = await PersistingState.Persist(this, GetImports, nameof(Imports));
+    private async Task LoadOrPersistImportSources() => ImportSources = await PersistingState.Persist(this, GetImportSources, nameof(Imports));
+    private async Task LoadOrPersistPuzzles() => Puzzles = await PersistingState.Persist(this, GetPuzzles, nameof(Imports));
 
-        await base.OnAfterRenderAsync(firstRender);
+    private async Task<bool> ConnectToImportHub()
+    {
+        ImportHubConnection = new HubConnectionBuilder()
+                             .WithUrl(Navigation.ToAbsoluteUri("/importpuzzlesstatehub"))
+                             .Build();
+
+        ImportHubConnection.On("ImportStatusUpdate",
+                               async (ImportStatusUpdateDto message) =>
+                               {
+                                   if (message.Completed)
+                                   {
+                                       ToastMessages.Add(new ToastMessage(ToastType.Success, "Puzzles imported"));
+                                       await LoadPuzzles();
+                                       await PuzzlesGrid.RefreshDataAsync();
+                                   }
+
+                                   await LoadImports();
+                                   await InvokeAsync(StateHasChanged);
+                               });
+
+        await ImportHubConnection.StartAsync();
+        return true;
     }
 
-    private async Task StartImport()
+    private async Task<bool> ConnectToPuzzlesHub()
     {
+        PuzzlesHubConnection = new HubConnectionBuilder()
+                              .WithUrl(Navigation.ToAbsoluteUri("/puzzleshub"))
+                              .Build();
+
+        PuzzlesHubConnection.On("AllPuzzlesDeleted",
+                                async () =>
+                                {
+                                    ToastMessages.Add(new ToastMessage(ToastType.Success, "All puzzles deleted"));
+                                    await LoadPuzzles();
+                                    await PuzzlesGrid.RefreshDataAsync();
+                                    await InvokeAsync(StateHasChanged);
+                                });
+
+        await PuzzlesHubConnection.StartAsync();
+        return true;
+    }
+
+
+    async Task<List<ImportSourceRp>> GetImportSources() => await ApiService.HttpClient.GetFromJsonAsync<List<ImportSourceRp>>("api/importsources");
+    async Task LoadImportSources() => ImportSources = await GetImportSources();
+
+    async Task<List<GetImportStatusesRp>> GetImports() => Imports = await ApiService.HttpClient.GetFromJsonAsync<List<GetImportStatusesRp>>("api/import");
+    async Task LoadImports() => Imports = await GetImports();
+
+    async Task<List<GetPuzzlesRp>?> GetPuzzles()
+    {
+        var getRqResult = await ApiService.HttpClient.GetAsync("api/puzzles");
+        var getPuzzlesResult = await getRqResult.Content.ReadFromJsonAsync<List<GetPuzzlesRp>>();
+        return getPuzzlesResult;
+    }
+
+    async Task LoadPuzzles() => await Puzzles.Apply(x => x.Clear()).ApplyAsync(async x => x.AddRange(await GetPuzzles()));
+
+    async Task StartImport()
+    {
+        if (!ImportSources.Any())
+            ToastMessages.Add(new ToastMessage(ToastType.Danger, "Import sources are not found"));
+
         var response = await ApiService.HttpClient.PostAsJsonAsync("api/import",
                                                                    new StartImportRq
                                                                    {
-                                                                       ImportSourceId = new Guid("9b77339e-ee3a-4c9c-8b3b-5fdd41c3a563")
+                                                                       ImportSourceId = ImportSources.First().Id
                                                                    });
     }
 
-    private async Task DeleteAll()
+    async Task DeleteAll()
     {
         await ApiService.HttpClient.DeleteAsync("api/puzzles/");
     }
-    
-    private async Task PopulateImports()
-    {
-        Imports = await ApiService.HttpClient.GetFromJsonAsync<List<GetImportStatusesRp>>("api/import");
-    }
 
-    private async Task PopulatePuzzles()
+
+    async Task PopulatePuzzles()
     {
         var getRqResult = await ApiService.HttpClient.GetAsync("api/puzzles");
         var getPuzzlesResult = await getRqResult.Content.ReadFromJsonAsync<List<GetPuzzlesRp>>();
         Puzzles = getPuzzlesResult;
     }
 
-    private async Task ShowAddPuzzleForm()
+    async Task ShowAddPuzzleForm()
     {
         await AddNewPuzzle.ShowAsync();
     }
 
-    private async Task<GridDataProviderResult<GetPuzzlesRp>> PuzzlesDataProvider(GridDataProviderRequest<GetPuzzlesRp> request)
-    {
-        if (Puzzles is null)
-        {
-            // pull employees only one time for client-side filtering, sorting, and paging
-            var getRqResult = await ApiService.HttpClient.GetAsync("api/puzzles");
-            var getPuzzlesResult = await getRqResult.Content.ReadFromJsonAsync<List<GetPuzzlesRp>>();
-            Puzzles = getPuzzlesResult;
-        }
+    async Task<GridDataProviderResult<GetPuzzlesRp>> PuzzlesDataProvider(GridDataProviderRequest<GetPuzzlesRp> request) => await Task.FromResult(request.ApplyTo(Puzzles));
 
-        return await Task.FromResult(request.ApplyTo(Puzzles));
-    }
-
-    private async Task OnSelectedItemsChanged(HashSet<GetPuzzlesRp> arg)
+    async Task OnSelectedItemsChanged(HashSet<GetPuzzlesRp> arg)
     {
     }
 

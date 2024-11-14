@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Http;
 using Auth0.AspNetCore.Authentication;
 using LexiQuest.Framework.Application.Messages.Context;
 using LexiQuest.Framework.Application.Messages.EventBus;
@@ -10,7 +11,7 @@ using LexiQuest.WebApp.Components;
 using LexiQuest.WebApp.Data;
 using LexiQuest.WebApp.EventBus;
 using LexiQuest.WebApp.Hubs;
-using LexiQuest.WebApp.Prerendering;
+using LexiQuest.WebApp.Services;
 using LexiQuest.WebApp.Shared.Services;
 using MassTransit;
 using MassTransit.Metadata;
@@ -71,11 +72,34 @@ static class Setup
         return builder;
     }
 
+    public static WebApplicationBuilder RegisterApiService(this WebApplicationBuilder builder)
+    {
+        builder.Services.AddTransient<PassAllCookiesHandler>();
+        builder.Services.AddHttpClient("WebApi",
+                                       (c, client) =>
+                                       {
+                                           var httpContextAccessor = c.GetRequiredService<IHttpContextAccessor>();
+                                           var httpContext = httpContextAccessor.HttpContext;
+                                           var baseAddress = $"https://{httpContext.Request.Host}{httpContext.Request.PathBase}";
+                                           client.BaseAddress = new Uri(baseAddress);
+                                       })
+               .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+                                                         {
+                                                             // это для того чтобы когда предотвартить ситуацию, когда с пререндеринга натыкаемся на unathorized,
+                                                             // он автоматически перевод на страницу логина и возвращается 200, хотя толжно быть 401
+                                                             AllowAutoRedirect = false
+                                                         })
+               .AddHttpMessageHandler<PassAllCookiesHandler>();
+        builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("WebApi"));
+        builder.Services.AddTransient<IApiService, ApiService>();
+        return builder;
+    }
+
     public static WebApplicationBuilder RegisterServices(this WebApplicationBuilder builder)
     {
-        // чтобы пререндеринг не ругался
-        builder.Services.AddTransient<IApiService, DummyApiService>();
+        builder.RegisterApiService();
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        builder.Services.AddScoped<IPersistingState, PersistingState>(); // transient потому что для каждого компонента должен быть свой сохранятор стейта
         return builder;
     }
 
@@ -107,24 +131,24 @@ static class Setup
                                                                 cfg.ConfigureEndpoints(ctx);
                                                                 cfg.UseInMemoryOutbox(ctx);
                                                             });
-                                            
+
                                             x.AddConfigureEndpointsCallback((context, name, cfg) =>
                                                                             {
                                                                                 //if LiveServer {
-                                                                                cfg.UseMessageRetry(r => r.Intervals(100));//, 500, 1000, 5000, 10000));
+                                                                                cfg.UseMessageRetry(r => r.Intervals(100)); //, 500, 1000, 5000, 10000));
                                                                                 // }
                                                                                 cfg.UseEntityFrameworkOutbox<WebAppDbContext>(context);
                                                                             });
-                                            
+
                                             MessageCorrelation.UseCorrelationId<IContextedMessage>(c => c.MessageContext.CorrelationId);
-                                            
+
                                             x.AddEntityFrameworkOutbox<WebAppDbContext>(c =>
                                                                                         {
                                                                                             c.UsePostgres();
                                                                                             c.UseBusOutbox();
                                                                                             c.DuplicateDetectionWindow = TimeSpan.FromMinutes(30);
                                                                                         });
-                                            
+
                                             var consumerTypes = typeof(Setup).Assembly.GetTypes().Where(RegistrationMetadata.IsConsumerOrDefinition).ToArray();
                                             x.AddConsumers(consumerTypes);
                                         });
@@ -140,7 +164,7 @@ static class Setup
         builder.Services
                .AddAuth0WebAppAuthentication(options =>
                                              {
-                                                 options.Domain = builder.Configuration["Auth0:Domain"];
+                                                 options.Domain   = builder.Configuration["Auth0:Domain"];
                                                  options.ClientId = builder.Configuration["Auth0:ClientId"];
                                              });
 
@@ -152,7 +176,7 @@ static class Setup
     {
         builder.Services
                .AddRazorComponents()
-               // .AddInteractiveServerComponents()
+               .AddInteractiveServerComponents()
                .AddInteractiveWebAssemblyComponents();
         builder.Services.AddBlazorBootstrap();
         builder.Services.AddControllers();
@@ -185,7 +209,7 @@ static class Setup
                 dbContext.Database.Migrate();
             }
         }
-        
+
         app.UseResponseCompression();
 
         if (app.Environment.IsDevelopment())
@@ -204,35 +228,38 @@ static class Setup
         app.UseStaticFiles();
         app.UseAntiforgery();
 
-        app.MapGet("/Account/Login", async (HttpContext httpContext, string redirectUri = "/") =>
-                                     {
-                                         var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
-                                                                       .WithRedirectUri(redirectUri)
-                                                                       .Build();
+        app.MapGet("/Account/Login",
+                   async (HttpContext httpContext, string redirectUri = "/") =>
+                   {
+                       var authenticationProperties = new LoginAuthenticationPropertiesBuilder()
+                                                     .WithRedirectUri(redirectUri)
+                                                     .Build();
 
-                                         await httpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-                                     });
+                       await httpContext.ChallengeAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+                   });
 
-        app.MapGet("/Account/Logout", async (HttpContext httpContext, string redirectUri = "/") =>
-                                      {
-                                          var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
-                                                                        .WithRedirectUri(redirectUri)
-                                                                        .Build();
+        app.MapGet("/Account/Logout",
+                   async (HttpContext httpContext, string redirectUri = "/") =>
+                   {
+                       var authenticationProperties = new LogoutAuthenticationPropertiesBuilder()
+                                                     .WithRedirectUri(redirectUri)
+                                                     .Build();
 
-                                          await httpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
-                                          await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-                                      });
+                       await httpContext.SignOutAsync(Auth0Constants.AuthenticationScheme, authenticationProperties);
+                       await httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+                   });
 
         app.MapRazorComponents<App>()
-           // .AddInteractiveServerRenderMode()
+           .AddInteractiveServerRenderMode()
            .AddInteractiveWebAssemblyRenderMode()
            .AddAdditionalAssemblies(typeof(IWASM).Assembly);
 
-        app.MapHub<StartNewGameStateHub>("/startgamestate");
-        app.MapHub<ImportPuzzlesStateHub>("/importpuzzlesstate");
-        app.MapHub<GameHub>("/game");
-        app.MapHub<ErrorHub>("/errors");
-        
+        app.MapHub<StartNewGameStateHub>("/startgamestatehub");
+        app.MapHub<ImportPuzzlesStateHub>("/importpuzzlesstatehub");
+        app.MapHub<PuzzlesHub>("/puzzleshub");
+        app.MapHub<GameHub>("/gamehub");
+        app.MapHub<ErrorHub>("/errorshub");
+
         app.MapControllers();
         return app;
     }

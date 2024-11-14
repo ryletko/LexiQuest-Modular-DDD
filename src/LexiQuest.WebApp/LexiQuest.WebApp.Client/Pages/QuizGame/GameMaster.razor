@@ -6,6 +6,7 @@
 @using Utils.Core
 @attribute [Authorize]
 @inject NavigationManager Navigation
+@inject IPersistingState PersistingState
 
 @Log
 
@@ -37,56 +38,63 @@
 
 @code {
 
+    private record PrerenderedState(Guid? CurrentGameId,
+                                    List<GetStartedGamesStatusesRp> StartedGamesStatuses,
+                                    bool Loading);
+
     private string Log;
 
     private HubConnection? HubConnection { get; set; }
 
-    public bool Loading { get; set; } = true;
+    private bool Loading = true;
 
-    public Guid? CurrentGameId { get; set; }
+    private Guid? CurrentGameId { get; set; }
 
-    public List<GetStartedGamesStatusesRp> StartedGamesStatuses { get; set; } = [];
+    private List<GetStartedGamesStatusesRp> StartedGamesStatuses = [];
 
     protected override async Task OnInitializedAsync()
     {
-        HubConnection = new HubConnectionBuilder()
-                       .WithUrl(Navigation.ToAbsoluteUri("/startgamestate"))
-                       .Build();
-
-        HubConnection.On<StartNewGameStatusDto>("StartNewGameStatusUpdate",
-                                                async (StartNewGameStatusDto message) =>
-                                                {
-                                                    if (message.Completed)
-                                                        await CheckStartedGame();
-
-                                                    await PopulateStartNewGameStatuses();
-                                                    await InvokeAsync(StateHasChanged);
-                                                });
-
-        await HubConnection.StartAsync();
-
+        await Task.WhenAll(ConnectToGameStateHub(), LoadOrPersistState());
         await base.OnInitializedAsync();
     }
 
-    public async Task PopulateStartNewGameStatuses()
+    private async Task LoadOrPersistState()
+    {
+        var prerenderedState = await PersistingState.Persist(this, ProvideStartedGameForPersistance);
+        CurrentGameId = prerenderedState.CurrentGameId;
+        StartedGamesStatuses.AddRange(prerenderedState.StartedGamesStatuses);
+        Loading = prerenderedState.Loading;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task<bool> ConnectToGameStateHub()
+    {
+        HubConnection = new HubConnectionBuilder()
+                       .WithUrl(Navigation.ToAbsoluteUri("/startgamestatehub"))
+                       .Build();
+
+        HubConnection.On("StartNewGameStatusUpdate",
+                         async (StartNewGameStatusDto message) =>
+                         {
+                             if (message.Completed)
+                                 await CheckStartedGame();
+
+                             await PopulateStartNewGameStatuses();
+                             await InvokeAsync(StateHasChanged);
+                         });
+
+        await HubConnection.StartAsync();
+        return true;
+    }
+    
+    private async Task PopulateStartNewGameStatuses()
     {
         StartedGamesStatuses = await ApiService.HttpClient.GetFromJsonAsync<List<GetStartedGamesStatusesRp>>("api/quizgame/games/started/statuses") ?? [];
     }
 
-    public async Task StartNewGame()
+    private async Task StartNewGame()
     {
         var response = await ApiService.HttpClient.PostAsync("api/quizgame/games/started", null);
-    }
-    
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await ProvideStartedGame();
-            await InvokeAsync(StateHasChanged);
-        }
-
-        await base.OnAfterRenderAsync(firstRender);
     }
 
     private async Task<bool> CheckStartedGame()
@@ -119,8 +127,17 @@
         await StartNewGame();
     }
 
+
+    private async Task<PrerenderedState> ProvideStartedGameForPersistance()
+    {
+        await ProvideStartedGame();
+        return new(CurrentGameId, StartedGamesStatuses, Loading);
+    }
+
+
     private async Task OnGameFinished()
     {
         await ProvideStartedGame();
     }
+
 }

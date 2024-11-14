@@ -72,7 +72,7 @@ internal class GoogleXlsxImportService(IGoogleExcelProvider googleExcelProvider)
         }
 
         var example = _format.ExampleColNum >= 0 && rowLength > _format.ExampleColNum && rowData[_format.ExampleColNum] != null  
-            ? rowData[_format.ExampleColNum].Split(';', '|')
+            ? rowData[_format.ExampleColNum].Split(';')
             : [];
 
         var transcription = _format.TranscriptionColNum >= 0 && rowLength > _format.TranscriptionColNum

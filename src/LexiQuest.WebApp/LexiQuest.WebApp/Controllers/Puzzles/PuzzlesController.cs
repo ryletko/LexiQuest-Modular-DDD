@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LexiQuest.Framework.Application.EventBus;
 using LexiQuest.Framework.Application.Messages.EventBus;
 using LexiQuest.PuzzleMgr.Contracts.Commands;
 using LexiQuest.PuzzleMgr.Contracts.Queries;

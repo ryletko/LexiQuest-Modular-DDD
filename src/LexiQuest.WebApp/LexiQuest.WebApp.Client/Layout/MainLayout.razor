@@ -56,10 +56,8 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await base.OnInitializedAsync();
-
         ErrorHubConnection = new HubConnectionBuilder()
-                            .WithUrl(Navigation.ToAbsoluteUri("/errors"))
+                            .WithUrl(Navigation.ToAbsoluteUri("/errorshub"))
                             .Build();
 
         ErrorHubConnection.On<string>("Error",
@@ -79,7 +77,6 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await base.OnAfterRenderAsync(firstRender);
         if (firstRender)
         {
             await JS.InvokeVoidAsync("initApp");

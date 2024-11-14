@@ -1,7 +1,7 @@
 ﻿using System.Net.Http;
 using LexiQuest.WebApp.Shared.Services;
 
-namespace LexiQuest.WebApp.Prerendering;
+namespace LexiQuest.WebApp.Services;
 
 internal class DummyApiService: IApiService
 {

@@ -1,21 +1,31 @@
 ﻿@page "/"
-@using LexiQuest.WebApp.Shared.Services
-@inject IApiService ApiService
+
 <div class="row">
     <div class="card w-100">
         <div class="card-body">
             <PageTitle>Home</PageTitle>
-            <h1>Hi!</h1>
+            <h1>Hi @Username</h1>
             <p>There will be a dashboard on this page.</p>
         </div>
     </div>
 </div>
 
 @code {
+    
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
 
-    private async Task Click()
+    private string? Username = "";
+
+    protected override async Task OnInitializedAsync()
     {
-        await ApiService.HttpClient.PostAsync("api/test", null);
-    }
+        if (authenticationState is not null)
+        {
+            var state = await authenticationState;
 
+            // Username = state?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? string.Empty;
+            Username = state?.User.Identity?.Name ?? String.Empty;
+        }
+        await base.OnInitializedAsync();
+    }
 }

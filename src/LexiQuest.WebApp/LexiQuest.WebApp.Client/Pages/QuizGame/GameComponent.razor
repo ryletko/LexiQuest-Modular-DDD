@@ -4,28 +4,13 @@
 @using LexiQuest.WebApp.Shared.QuizGame
 @using LexiQuest.WebApp.Shared.Services
 @using Microsoft.AspNetCore.SignalR.Client
+@implements  IAsyncDisposable;
 @inject IApiService ApiService
 @inject NavigationManager Navigation
 @inject IJSRuntime JsRuntime;
+@inject IPersistingState PersistingState;
 
 <Toasts class="p-3" Messages="ToastMessages" Placement="ToastsPlacement.MiddleCenter" AutoHide="true" Delay="1000"/>
-
-<script>
-    window.gameComponent = {
-        init: function (dotNetReference) {
-            window.gameComponent.tryReconnectSignalR = function () {
-                console.log('trying reconnecting...');
-                dotNetReference.invokeMethodAsync('TryReconnectSignalR');
-            };
-        }
-    };
-    
-    window.addEventListener('focus', function ()  {
-        console.log('window focus');
-        window.gameComponent.tryReconnectSignalR();
-    });
-    
-</script>
 
 <div class="row">
     <div class="col-10">
@@ -98,11 +83,10 @@
                     <div>@Game.PreviousPuzzle.Transcription</div>
                     @if (Game.PreviousPuzzle.Examples.Any())
                     {
-                        <div class="mt-1">Examples:</div>
-                        <ul>
+                        <ul class="example">
                             @foreach (var ex in Game.PreviousPuzzle.Examples)
                             {
-                                <li>@ex</li>
+                                <li class="mb-1">@ex</li>
                             }
                         </ul>
                     }
@@ -117,26 +101,42 @@
 
 @code {
 
+    private const string ComponentPath = "Pages/QuizGame/GameComponent.razor";
+
     [Parameter] public Guid GameId { get; set; }
-
-    readonly List<ToastMessage> ToastMessages = [];
-
-    ElementReference AnswerInput;
-
-    HubConnection? GameHubConnection { get; set; }
-
-    string Answer { get; set; } = String.Empty;
-
-    GetGameByIdRp? Game { get; set; }
-
     [Parameter] public EventCallback OnGameFinished { get; set; }
 
-    private ConcurrentDictionary<Guid, bool> _awaitedCommands = [];
+    private readonly List<ToastMessage> ToastMessages = [];
+
+    private ElementReference AnswerInput;
+
+    private HubConnection? GameHubConnection;
+
+    private string Answer = String.Empty;
+
+    private GetGameByIdRp? Game;
+
+    private ConcurrentDictionary<Guid, bool> AwaitedCommands = [];
+
+    private IJSObjectReference? JsModule;
 
     protected override async Task OnInitializedAsync()
     {
+        await Task.WhenAll(ConnectToGameHub(), LoadOrPersisState());
+        await base.OnInitializedAsync();
+    }
+
+    async Task<GetGameByIdRp> GetGame() => await ApiService.HttpClient.GetFromJsonAsync<GetGameByIdRp>($"api/quizgame/games/{GameId}");
+
+    private async Task LoadOrPersisState()
+    {
+        Game = await PersistingState.Persist(this, GetGame);
+    }
+
+    private async Task<bool> ConnectToGameHub()
+    {
         GameHubConnection = new HubConnectionBuilder()
-                           .WithUrl(Navigation.ToAbsoluteUri("/game"))
+                           .WithUrl(Navigation.ToAbsoluteUri("/gamehub"))
                            .Build();
 
         GameHubConnection.On<GameStateUpdatedDto>("GameStateUpdated",
@@ -153,7 +153,7 @@
 
                                                       await LoadGameState();
 
-                                                      if (_awaitedCommands.TryRemove(model.CommandId, out var dummy))
+                                                      if (AwaitedCommands.TryRemove(model.CommandId, out var dummy))
                                                       {
                                                           // Toast(ToastType.Danger, model.CommandId.ToString());
                                                           ToastLastResult();
@@ -166,8 +166,9 @@
 
         await GameHubConnection.StartAsync();
 
-        await base.OnInitializedAsync();
+        return true;
     }
+
 
     [JSInvokable]
     public async Task TryReconnectSignalR()
@@ -185,22 +186,28 @@
         }
     }
 
-
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await LoadGameState();
-            await InvokeAsync(StateHasChanged);
-            await JsRuntime.InvokeVoidAsync("gameComponent.init", DotNetObjectReference.Create(this));
+            JsModule = await JsRuntime.InvokeAsync<IJSObjectReference>("import", $"./{ComponentPath}.js");
+            await JsModule.InvokeVoidAsync("init", DotNetObjectReference.Create(this));
         }
 
         await base.OnAfterRenderAsync(firstRender);
     }
 
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (JsModule is not null)
+        {
+            await JsModule.DisposeAsync();
+        }
+    }
+    
     private async Task LoadGameState()
     {
-        Game = await ApiService.HttpClient.GetFromJsonAsync<GetGameByIdRp>($"api/quizgame/games/{GameId}");
+        Game = await GetGame();
         await FocusToAnswerInput();
         ClearFormIfNewCard();
     }
@@ -229,7 +236,7 @@
 
     private void ClearFormIfNewCard()
     {
-        if (Game!.CurrentFaceUpCard.LastResult == null)
+        if (Game?.CurrentFaceUpCard.LastResult == null)
         {
             Answer = String.Empty;
         }
@@ -237,6 +244,7 @@
 
     private async Task SubmitAnswer()
     {
+        await TryReconnectSignalR();
         // TODO надо подумать о том, что можно было бы correlation id устанавливать прямо с фронта, чтобы лучше отлавливалось через signalr относящееся к этому запросу,
         // а то вдруг ответ на этот запрос придет позже чем signalr просигналит об обновившемся статусе 
         var result = await ApiService.HttpClient.PostAsJsonAsync($"api/quizgame/faceupcards/{Game.CurrentFaceUpCard.CardId}/answer",
@@ -247,7 +255,7 @@
         if (result.IsSuccessStatusCode)
         {
             var commandId = await result.Content.ReadFromJsonAsync<Guid>();
-            _awaitedCommands.TryAdd(commandId, true);
+            AwaitedCommands.TryAdd(commandId, true);
         }
 
         await FocusToAnswerInput();
@@ -282,5 +290,5 @@
         char[] delimiters = [' ', '\r', '\n'];
         return puzzle.ForeignWord.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).Length;
     }
-
+    
 }

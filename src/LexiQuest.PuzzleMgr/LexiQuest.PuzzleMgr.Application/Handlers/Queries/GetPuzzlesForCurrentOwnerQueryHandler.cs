@@ -15,7 +15,7 @@ internal class GetPuzzlesForCurrentOwnerHandler(IQueryContext queryContext)
     {
         var userId = new PuzzleOwnerId(query.MessageContext.UserId);
         var puzzleItems = await queryContext.Query<Puzzle>()
-                                             //.Where(x => x.PuzzleOwnerId == userId)
+                                            .Where(x => x.PuzzleOwnerId == userId)
                                             .Select(x => new GetPuzzlesForCurrentOwnerQueryResult.PuzzleItem(
                                                         x.Id.Value,
                                                         x.ForeignWord.ToString(),
