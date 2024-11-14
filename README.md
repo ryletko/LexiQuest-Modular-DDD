@@ -7,7 +7,7 @@ Modular application built with Clean Architecture and DDD principles which is re
 
 ## Introduction
 
-I think it's long been clear to everyone how to handle order processing in a DDD style. Enough with the repetitive examples! Such examples cover the core principles only superficially, without addressing edge cases at all. Let's imagine how we could design a card game for people learning foreign words. This task is quite atypical for DDD, at least based on what I could find on GitHub. With this example, you can explore:
+I think it's long been clear to everyone how to handle order processing in a DDD style. Enough with the repetitive examples! Such examples cover the core principles only superficially, without addressing corner cases at all. Let's imagine how we could design a card game for people learning foreign words. This task is quite atypical for DDD, at least based on what I could find on GitHub. With this example, you can explore:
 
 * HOW TO break down a non-trivial task into bounded-contexts and allocate an independent isolated module for each bounded context, architecturally ensuring the possibility of turning any module into a microservice deployed on a separate machine.
 * HOW TO abstract the inter-module interaction mechanism — it's possible to avoid using docker containers, and go for a regular database or even memory for message exchange, for example, to deploy the application on web hosting, and later when required to switch to VPS.
